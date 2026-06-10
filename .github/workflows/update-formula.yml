@@ -1,0 +1,42 @@
+name: Update formula to latest npm release
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * *'
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Check npm for a new version and update the formula
+        id: bump
+        run: |
+          set -euo pipefail
+          LATEST=$(curl -fsSL https://registry.npmjs.org/@texra-ai/cli/latest | jq -r .version)
+          CURRENT=$(sed -n 's|.*/cli-\(.*\)\.tgz.*|\1|p' Formula/texra.rb)
+          echo "current=$CURRENT latest=$LATEST"
+          if [ "$LATEST" = "$CURRENT" ]; then
+            echo "Formula already at $LATEST"
+            exit 0
+          fi
+          TARBALL="https://registry.npmjs.org/@texra-ai/cli/-/cli-${LATEST}.tgz"
+          SHA256=$(curl -fsSL "$TARBALL" | shasum -a 256 | cut -d' ' -f1)
+          sed -i "s|/cli-.*\.tgz|/cli-${LATEST}.tgz|" Formula/texra.rb
+          sed -i "s|^  sha256 \".*\"|  sha256 \"${SHA256}\"|" Formula/texra.rb
+          echo "version=$LATEST" >> "$GITHUB_OUTPUT"
+
+      - name: Commit and push
+        if: steps.bump.outputs.version != ''
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/texra.rb
+          git commit -m "texra ${{ steps.bump.outputs.version }}"
+          git push
