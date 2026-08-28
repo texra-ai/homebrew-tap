@@ -1,8 +1,8 @@
 class Texra < Formula
   desc "AI-powered LaTeX research assistant for the terminal"
   homepage "https://texra.ai"
-  url "https://registry.npmjs.org/@texra-ai/cli/-/cli-0.40.5.tgz"
-  sha256 "9945bda7983c1dfbaaabe0d8d0efaa0c9f71514ea8b15f1c9a6aec95dbe7ad69"
+  url "https://registry.npmjs.org/@texra-ai/cli/-/cli-0.40.6.tgz"
+  sha256 "084f69861c29af9829e9643ac99014cbe4a2e435a0f1ef0b0cb08aeefd93f225"
   license :cannot_represent
 
   depends_on "node"
